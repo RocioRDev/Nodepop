@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Swagger Nodepop - OpenAPI 3.0
+  description: |-
+    Esta es la api de la aplicación NODEPOP. Se trata de un servicio de venta de articulos de segunda mano.
+    
+    Algunos links de utilidad:
+    - [The Pet Store repository](https://github.com/RocioRDev/Nodepop)
+    - [The source API definition for the Pet Store](https://github.com/RocioRDev/Nodepop/api-nodepop/venta-articulos.yaml)
+  contact:
+    email: rociorgdev@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+  
+tags:
+  - name: anuncios
+    description: Todos los anuncios de Nodepop
+    
+paths:
+  /anuncios:
+    get:
+      tags:
+        - anuncios
+      summary: Buscar un anuncio 
+      description: Buscar un anuncio dentro de Nodepop con filtros y paginación
+      operationId: buscarAnuncio
+      parameters:
+        - name: tags
+          in: query
+          description: Filtro por tags. Puedes filtrar por más de un tag
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - work
+                - lifestyle
+                - motor
+                - mobile
+        - name: tipo_de_anuncio
+          in: query
+          description: Filtro por si el anuncio está en venta o no
+          required: false
+          schema:
+            type: string
+            enum:
+              - venta
+              - busqueda
+        - name: nombre_de_articulo
+          in: query
+          description: Filtro por nombre del articulo
+          required: false
+          schema:
+            type: string
+        - name: precio
+          in: query
+          description: Filtro por precio. Se pueden utilizar los operadores "<", ">" y "-" para realizar rango de precios
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Número de página a obtener
+          required: false
+          schema:
+            type: integer
+        - name: per_page
+          in: query
+          description: Número de resultados por página
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Anuncios encontrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  anuncios:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Anuncio'
+                  total:
+                    type: integer
+                  pages:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+    
+components:
+  schemas:
+    Anuncio:
+      type: object
+      required:
+        - nombre
+        - tipo_de_anuncio
+        - precio
+        - foto
+        - tags
+      properties:
+        nombre:
+          type: string
+          description: Nombre del artículo del anuncio
+        tipo_de_anuncio:
+          type: string
+          enum:
+            - venta
+            - busqueda
+          description: Indica si el anuncio es de venta o de búsqueda
+        precio:
+          type: number
+          description: Precio del artículo o del monto que se está dispuesto a pagar en caso de ser un anuncio de búsqueda
+        foto:
+          type: string
+          description: URL de la foto del artículo
+        tags:
+          type: array
+          items:
+            type: string
+            enum:
+              - work
+              - lifestyle
+              - motor
+              - mobile
+          description: Etiquetas del anuncio
