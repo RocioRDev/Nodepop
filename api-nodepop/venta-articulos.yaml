@@ -5,8 +5,8 @@ info:
     Esta es la api de la aplicación NODEPOP. Se trata de un servicio de venta de articulos de segunda mano.
     
     Algunos links de utilidad:
-    - [The Pet Store repository](https://github.com/RocioRDev/Nodepop)
-    - [The source API definition for the Pet Store](https://github.com/RocioRDev/Nodepop/api-nodepop/venta-articulos.yaml)
+    - [Repositorio Github de Nodepop](https://github.com/RocioRDev/Nodepop)
+    - [La definición de la API para la tienda de Nodepop](https://github.com/RocioRDev/Nodepop/api-nodepop/venta-articulos.yaml)
   contact:
     email: rociorgdev@gmail.com
   license:
@@ -25,9 +25,9 @@ paths:
     get:
       tags:
         - anuncios
-      summary: Buscar un anuncio 
-      description: Buscar un anuncio dentro de Nodepop con filtros y paginación
-      operationId: buscarAnuncio
+      summary: Buscar anuncios
+      description: Buscar anuncios dentro de Nodepop con filtros y paginación
+      operationId: buscarAnuncios
       parameters:
         - name: tags
           in: query
@@ -59,7 +59,7 @@ paths:
             type: string
         - name: precio
           in: query
-          description: Filtro por precio. Se pueden utilizar los operadores "<", ">" y "-" para realizar rango de precios
+          description: Filtro por precio. Se pueden utilizar los operadores "<", ">" y "=" para realizar rango de precios
           required: false
           schema:
             type: string
@@ -95,6 +95,118 @@ paths:
                     type: integer
                   per_page:
                     type: integer
+    post:
+      tags:
+        - anuncios
+      summary: Crear un nuevo anuncio
+      description: Crea un nuevo anuncio en Nodepop
+      operationId: crearAnuncio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Anuncio'
+      responses:
+        '201':
+          description: Anuncio creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anuncio'
+        '400':
+          description: Error al crear el anuncio. Algún campo es inválido o falta algún campo obligatorio
+          
+  /anuncios/{id}:
+    get:
+      tags:
+        - anuncios
+      summary: Obtener un anuncio por su ID
+      description: Obtiene un anuncio específico de Nodepop a partir de su ID
+      operationId: obtenerAnuncioPorId
+      parameters:
+        - name: id
+          in: path
+          description: ID del anuncio a obtener
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Anuncio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anuncio'
+        '404':
+          description: Anuncio no encontrado
+    put:
+      tags:
+        - anuncios
+      summary: Actualizar un anuncio
+      description: Actualiza un anuncio existente en Nodepop
+      operationId: actualizarAnuncio
+      parameters:
+        - name: id
+          in: path
+          description: ID del anuncio a actualizar
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Anuncio'
+      responses:
+        '200':
+          description: Anuncio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anuncio'
+        '404':
+          description: Anuncio no encontrado
+    delete:
+      tags:
+        - anuncios
+      summary: Eliminar un anuncio
+      description: Elimina un anuncio existente en Nodepop
+      operationId: eliminarAnuncio
+      parameters:
+        - name: id
+          in: path
+          description: ID del anuncio a eliminar
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Anuncio eliminado
+        '404':
+          description: Anuncio no encontrado
+  /tags:
+    get:
+      tags:
+        - anuncios
+      summary: Obtener la lista de tags disponibles
+      description: Obtiene la lista de las 4 tags disponibles para filtrar los anuncios work, lifestyle, motor y mobile
+      operationId: obtenerTags
+      responses:
+        '200':
+          description: Lista de tags disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum:
+                    - work
+                    - lifestyle
+                    - motor
+                    - mobile    
     
 components:
   schemas:
