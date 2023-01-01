@@ -87,14 +87,17 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Anuncio'
-                  total:
-                    type: integer
-                  pages:
-                    type: integer
-                  page:
-                    type: integer
-                  per_page:
-                    type: integer
+                  paginacion:
+                    type: object
+                    properties:
+                      pagina:
+                        type: integer
+                      tamaño:
+                        type: integer
+                      total_paginas:
+                        type: integer
+                      total_anuncios:
+                        type: integer
     post:
       tags:
         - anuncios
