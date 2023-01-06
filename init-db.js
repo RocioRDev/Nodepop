@@ -16,22 +16,19 @@ const anunciosJSON = fs.readFileSync(path.join(__dirname, 'anuncios.json'), 'utf
 const anuncios = JSON.parse(anunciosJSON);
 
 
-// Eliminamos todos los anuncios y los volvemos a crear
-Anuncio.deleteMany({}, (err) => {
-    if (err) {
-      console.error('Error al eliminar anuncios:', err);
-    } else {
-      console.log('Anuncios eliminados');
-      Anuncio.create(anuncios, (err, anunciosCreados) => {
-        if (err) {
-          console.error('Error al crear anuncios:', err);
-        } else {
-          console.log('Anuncios creados:', anunciosCreados);
-        }
-        mongoose.connection.close();
-      });
-    }    
-  });
+// Eliminamos todos los anuncios y los volvemos a crear con async/await
+async function init() {
+  try {
+    await Anuncio.deleteMany({});
+    console.log('Anuncios eliminados');
+    const anunciosCreados = await Anuncio.create(anuncios);
+    console.log('Anuncios creados:', anunciosCreados);
+    mongoose.connection.close();
+  } catch (err) {
+    console.error('Error al inicializar la base de datos:', err);
+    mongoose.connection.close();
+    process.exit(1);
+  }
+}
 
-
-
+init();
