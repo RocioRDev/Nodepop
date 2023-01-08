@@ -1,0 +1,31 @@
+[
+    {
+      "nombre": "Bicicleta",
+      "tipo_de_anuncio": "venta",
+      "precio": 150,
+      "foto": "https://example.com/bicicleta.jpg",
+      "tags": ["lifestyle", "motor"]
+    },
+    {
+      "nombre": "Ordenador",
+      "tipo_de_anuncio": "venta",
+      "precio": 500,
+      "foto": "https://example.com/ordenador.jpg",
+      "tags": ["work"]
+    },
+    {
+      "nombre": "Móvil",
+      "tipo_de_anuncio": "venta",
+      "precio": 250,
+      "foto": "https://example.com/movil.jpg",
+      "tags": ["mobile"]
+    },
+    {
+      "nombre": "Libro",
+      "tipo_de_anuncio": "busqueda",
+      "precio": 20,
+      "foto": "https://example.com/libro.jpg",
+      "tags": ["lifestyle"]
+    }
+]
+  
