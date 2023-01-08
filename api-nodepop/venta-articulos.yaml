@@ -57,9 +57,15 @@ paths:
           required: false
           schema:
             type: string
-        - name: precio
+        - name: precioMin
           in: query
-          description: Filtro por precio. Se pueden utilizar los operadores "<", ">" y "=" para realizar rango de precios
+          description: Filtro por precio, representa la cantidad minima
+          required: false
+          schema:
+            type: string
+        - name: precioMax
+          in: query
+          description: Filtro por precio, representa la cantidad maxima
           required: false
           schema:
             type: string

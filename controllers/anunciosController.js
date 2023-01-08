@@ -1,4 +1,7 @@
 const Anuncio = require('../models/Anuncio');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 // Obtener lista de anuncios con filtros y paginación
 exports.buscarAnuncio = (req, res) => {
@@ -7,7 +10,7 @@ exports.buscarAnuncio = (req, res) => {
   const tamaño = parseInt(req.query.tamaño) || 10;  
 
   // Obtener parámetros de búsqueda y paginación
-  const { tags, tipo_de_anuncio, precio, nombre} = req.query;
+  const { tags, tipo_de_anuncio, precioMin, precioMax, nombre} = req.query;
   
   // Crear objeto de filtros
   const filtros = {};
@@ -17,24 +20,21 @@ exports.buscarAnuncio = (req, res) => {
   if (tipo_de_anuncio) {
     filtros.tipo_de_anuncio = tipo_de_anuncio;
   }
-  if (precio) {
-    // Obtener rango de precios
-    const rangoPrecios = precio.split('-');
-    if (rangoPrecios.length === 1) {
-      filtros.precio = precio;
-    } else {
-      filtros.precio = {};
-      if (rangoPrecios[0] !== '') {
-        filtros.precio.$gte = rangoPrecios[0];
-      }
-      if (rangoPrecios[1] !== '') { 
-        filtros.precio.$lte = rangoPrecios[1];
-      }
+  // Filtro de precio
+  if (precioMin || precioMax) {
+    filtros.precio = {};
+    if (precioMin) {
+      filtros.precio.$gte = precioMin;
+    }
+    if (precioMax) {
+      filtros.precio.$lte = precioMax;
     }
   }
+
+  // Filtro de nombre que empiece por el texto introducido
   if (nombre) {
     filtros.nombre = new RegExp('^' + nombre, "i");
-  }
+  }  
 
   // Obtener número de anuncios a saltar
     const skip = (pagina - 1) * tamaño;    
@@ -101,47 +101,61 @@ exports.obtenerAnuncioPorId = (req, res) => {
 
 // Crear un nuevo anuncio
 exports.crearAnuncio = (req, res) => {
-    // Obtener datos del anuncio a crear
-    const { nombre, tipo_de_anuncio, precio, foto, tags } = req.body;
+  // imprimir por consola el request
+  console.log(req.body);
+  console.log(req.file);    
+      // Obtener datos del anuncio a crear
+      let { nombre, tipo_de_anuncio, precio, foto, tags } = req.body;
 
-    // Validar que las tags sean válidas
-    const tagsValidas = ['work', 'lifestyle', 'motor', 'mobile'];
-    if (tags) {
-        for (let i = 0; i < tags.length; i++) {
-            if (!tagsValidas.includes(tags[i])) {
-                return res.status(400).send({ message: 'Las tags deben ser válidas' });
-            }
-        }
-    }
+      // Añadir el nombre de la foto guardada a la propiedad foto
+      foto = req.file.filename;
 
-    // Validar que el tipo de anuncio sea válido
-    const tiposValidos = ['venta', 'busqueda'];
-    if (tipo_de_anuncio && !tiposValidos.includes(tipo_de_anuncio)) {
-        return res.status(400).send({ message: 'El tipo de anuncio debe ser válido' });
-    }
-
-    // Validar que el precio sea válido y mayor que 0
-    if (precio && (isNaN(precio) || precio <= 0)) {
-        return res.status(400).send({ message: 'El precio debe ser válido y mayor que 0' });
-    }
-    
-    
-    // Validar datos del anuncio
-    if (!nombre || !tipo_de_anuncio || !precio || !foto || !tags) {
-      return res.status(400).send({ message: 'Faltan datos para crear el anuncio' });
-    }
-    
-    // Crear nuevo anuncio
-    const anuncio = new Anuncio({ nombre, tipo_de_anuncio, precio, foto, tags });
-    
-    // Guardar anuncio en la base de datos
-    anuncio.save((err, anuncioGuardado) => {
-      if (err) {
-        return res.status(500).send({ message: 'Error al crear el anuncio' });
+      // Verificar si las tags es un array o un string, si es un string convertirlo a array
+      if (typeof tags === 'string') {
+          tags = tags.split(',');
       }
-      res.status(201).send({ anuncio: anuncioGuardado });
-    });
-  };
+
+      // Validar que las tags sean válidas
+      const tagsValidas = ['work', 'lifestyle', 'motor', 'mobile'];
+      if (tags) {
+          for (let i = 0; i < tags.length; i++) {
+              if (!tagsValidas.includes(tags[i])) {
+                  return res.status(400).send({ message: 'Las tags deben ser válidas' });
+              }
+          }
+      }
+
+      // Validar que el tipo de anuncio sea válido
+      const tiposValidos = ['venta', 'busqueda'];
+      if (tipo_de_anuncio && !tiposValidos.includes(tipo_de_anuncio)) {
+          return res.status(400).send({ message: 'El tipo de anuncio debe ser válido' });
+      }
+
+      // Validar que el precio sea válido y mayor que 0
+      if (precio && (isNaN(precio) || precio <= 0)) {
+          return res.status(400).send({ message: 'El precio debe ser válido y mayor que 0' });
+      }
+      
+      
+      // Validar datos del anuncio
+      if (!nombre || !tipo_de_anuncio || !precio || !foto || !tags) {
+        return res.status(400).send({ message: 'Faltan datos para crear el anuncio' });
+      }
+      
+      // Crear nuevo anuncio
+      const anuncio = new Anuncio({ nombre, tipo_de_anuncio, precio, foto, tags });
+      
+      // Guardar anuncio en la base de datos
+      anuncio.save((err, anuncioGuardado) => {
+        if (err) {
+          return res.status(500).send({ message: 'Error al crear el anuncio' });
+        }
+        res.status(201).send({ anuncio: anuncioGuardado });
+      });
+    }
+  //});
+//};
+  
 
 // Actualizar un anuncio
 exports.actualizarAnuncio = (req, res) => {
@@ -196,6 +210,27 @@ exports.eliminarAnuncio = (req, res) => {
             return res.status(404).send({ message: 'No se encontró el anuncio con el ID especificado' });
         }
         
+        // Mostar por consola el nombre de la foto del anuncio
+        console.log(anuncio.foto);
+        
+        // Eliminar la foto del anuncio con async/await
+        eliminarFoto = async () => {
+            try {
+              // Eliminar la foto del anuncio usando fs.unlink y path.join              
+              await fs.unlink(path.join(__dirname, '../public/images/' + anuncio.foto), (err) => {
+                if (err) {
+                  return res.status(500).send({ message: 'Error al eliminar la foto del anuncio' });
+                }
+                console.log('Foto eliminada');
+              });
+            // Capturar errores y devolverlos en el res del controlador  
+            } catch (error) {
+              console.error(error);
+              return res.status(500).send({ message: 'Error al eliminar la foto del anuncio' });                
+            }
+        };
+        eliminarFoto();
+
         // Eliminar anuncio
         anuncio.remove((err) => {
             if (err) {
@@ -205,3 +240,22 @@ exports.eliminarAnuncio = (req, res) => {
         });
     });
 };
+
+// Configurar Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../public/images/');
+  },
+  // Añaadir la fecha al nombre del archivo
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },    
+});
+
+const upload = multer({
+  storage: storage,  
+  limits: { fileSize: 5242880 } //5MB max
+});
+
+// Subir imagen
+subirImagen = upload.single('foto');
