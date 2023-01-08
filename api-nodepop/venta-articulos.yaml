@@ -14,7 +14,7 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:3000/api/v1
   
 tags:
   - name: anuncios
@@ -51,7 +51,7 @@ paths:
             enum:
               - venta
               - busqueda
-        - name: nombre_de_articulo
+        - name: nombre
           in: query
           description: Filtro por nombre del articulo
           required: false
@@ -69,13 +69,13 @@ paths:
           required: false
           schema:
             type: string
-        - name: page
+        - name: pagina
           in: query
           description: Número de página a obtener
           required: false
           schema:
             type: integer
-        - name: per_page
+        - name: tamaño
           in: query
           description: Número de resultados por página
           required: false
@@ -113,9 +113,37 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Anuncio'
+              type: object
+              properties:
+                nombre:
+                  type: string
+                tipo_de_anuncio:
+                  type: string
+                  enum:
+                    - venta
+                    - busqueda
+                precio:
+                  type: number
+                foto:
+                  type: string
+                  format: binary
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - work
+                      - lifestyle
+                      - motor
+                      - mobile
+              required:
+                - nombre
+                - tipo_de_anuncio
+                - precio
+                - foto
+                - tags
       responses:
         '201':
           description: Anuncio creado
@@ -195,7 +223,7 @@ paths:
           description: Anuncio eliminado
         '404':
           description: Anuncio no encontrado
-  /tags:
+  /anuncios/tags:
     get:
       tags:
         - anuncios

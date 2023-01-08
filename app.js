@@ -31,9 +31,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configurar swagger
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./api-nodepop/apidoc.json');
+
+// Uso de las rutas
+// app.use('/apidocs/', express.static(path.join(__dirname, 'api-nodepop/venta-articulos.yaml')));
+// Ruta principal
 app.use('/', indexRouter);
+// Ruta de usuarios
 app.use('/users', usersRouter);
-app.use('/anuncios', anunciosRouter);
+// Ruta de anuncios
+app.use('/api/v1/anuncios', anunciosRouter);
+// Ruta de la documentacion de la API
+app.use('/apidoc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

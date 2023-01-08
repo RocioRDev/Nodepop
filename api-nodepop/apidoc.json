@@ -1,0 +1,411 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Swagger Nodepop - OpenAPI 3.0",
+      "description": "Esta es la api de la aplicación NODEPOP. Se trata de un servicio de venta de articulos de segunda mano.\n\nAlgunos links de utilidad:\n- [Repositorio Github de Nodepop](https://github.com/RocioRDev/Nodepop)\n- [La definición de la API para la tienda de Nodepop](https://github.com/RocioRDev/Nodepop/api-nodepop/venta-articulos.yaml)",
+      "contact": {
+        "email": "rociorgdev@gmail.com"
+      },
+      "license": {
+        "name": "Apache 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api/v1"
+      }
+    ],
+    "tags": [
+      {
+        "name": "anuncios",
+        "description": "Todos los anuncios de Nodepop"
+      }
+    ],
+    "paths": {
+      "/anuncios": {
+        "get": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Buscar anuncios",
+          "description": "Buscar anuncios dentro de Nodepop con filtros y paginación",
+          "operationId": "buscarAnuncios",
+          "parameters": [
+            {
+              "name": "tags",
+              "in": "query",
+              "description": "Filtro por tags. Puedes filtrar por más de un tag",
+              "required": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "work",
+                    "lifestyle",
+                    "motor",
+                    "mobile"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "tipo_de_anuncio",
+              "in": "query",
+              "description": "Filtro por si el anuncio está en venta o no",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "venta",
+                  "busqueda"
+                ]
+              }
+            },
+            {
+              "name": "nombre",
+              "in": "query",
+              "description": "Filtro por nombre del articulo",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "precioMin",
+              "in": "query",
+              "description": "Filtro por precio, representa la cantidad minima",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "precioMax",
+              "in": "query",
+              "description": "Filtro por precio, representa la cantidad maxima",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "pagina",
+              "in": "query",
+              "description": "Número de página a obtener",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            },
+            {
+              "name": "tamaño",
+              "in": "query",
+              "description": "Número de resultados por página",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Anuncios encontrados",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "anuncios": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/Anuncio"
+                        }
+                      },
+                      "paginacion": {
+                        "type": "object",
+                        "properties": {
+                          "pagina": {
+                            "type": "integer"
+                          },
+                          "tamaño": {
+                            "type": "integer"
+                          },
+                          "total_paginas": {
+                            "type": "integer"
+                          },
+                          "total_anuncios": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Crear un nuevo anuncio",
+          "description": "Crea un nuevo anuncio en Nodepop",
+          "operationId": "crearAnuncio",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "nombre": {
+                      "type": "string"
+                    },
+                    "tipo_de_anuncio": {
+                      "type": "string",
+                      "enum": [
+                        "venta",
+                        "busqueda"
+                      ]
+                    },
+                    "precio": {
+                      "type": "number"
+                    },
+                    "foto": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "work",
+                          "lifestyle",
+                          "motor",
+                          "mobile"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "nombre",
+                    "tipo_de_anuncio",
+                    "precio",
+                    "foto",
+                    "tags"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Anuncio creado",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Anuncio"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Error al crear el anuncio. Algún campo es inválido o falta algún campo obligatorio"
+            }
+          }
+        }
+      },
+      "/anuncios/{id}": {
+        "get": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Obtener un anuncio por su ID",
+          "description": "Obtiene un anuncio específico de Nodepop a partir de su ID",
+          "operationId": "obtenerAnuncioPorId",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID del anuncio a obtener",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Anuncio encontrado",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Anuncio"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Anuncio no encontrado"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Actualizar un anuncio",
+          "description": "Actualiza un anuncio existente en Nodepop",
+          "operationId": "actualizarAnuncio",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID del anuncio a actualizar",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anuncio"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Anuncio actualizado",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Anuncio"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Anuncio no encontrado"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Eliminar un anuncio",
+          "description": "Elimina un anuncio existente en Nodepop",
+          "operationId": "eliminarAnuncio",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID del anuncio a eliminar",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Anuncio eliminado"
+            },
+            "404": {
+              "description": "Anuncio no encontrado"
+            }
+          }
+        }
+      },
+      "/anuncios/tags": {
+        "get": {
+          "tags": [
+            "anuncios"
+          ],
+          "summary": "Obtener la lista de tags disponibles",
+          "description": "Obtiene la lista de las 4 tags disponibles para filtrar los anuncios work, lifestyle, motor y mobile",
+          "operationId": "obtenerTags",
+          "responses": {
+            "200": {
+              "description": "Lista de tags disponibles",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "work",
+                        "lifestyle",
+                        "motor",
+                        "mobile"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Anuncio": {
+          "type": "object",
+          "required": [
+            "nombre",
+            "tipo_de_anuncio",
+            "precio",
+            "foto",
+            "tags"
+          ],
+          "properties": {
+            "nombre": {
+              "type": "string",
+              "description": "Nombre del artículo del anuncio"
+            },
+            "tipo_de_anuncio": {
+              "type": "string",
+              "enum": [
+                "venta",
+                "busqueda"
+              ],
+              "description": "Indica si el anuncio es de venta o de búsqueda"
+            },
+            "precio": {
+              "type": "number",
+              "description": "Precio del artículo o del monto que se está dispuesto a pagar en caso de ser un anuncio de búsqueda"
+            },
+            "foto": {
+              "type": "string",
+              "description": "URL de la foto del artículo"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "work",
+                  "lifestyle",
+                  "motor",
+                  "mobile"
+                ]
+              },
+              "description": "Etiquetas del anuncio"
+            }
+          }
+        }
+      }
+    }
+  }
